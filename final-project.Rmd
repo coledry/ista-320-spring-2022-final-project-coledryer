@@ -8,19 +8,48 @@ output: html_document
 ```{r setup, include=FALSE}
 # remember to add any other libraries you need here:
 library(knitr)
+library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
 library(ggthemes)
 opts_chunk$set(echo = TRUE)
 ```
+
+This project is about student performance when it comes to high school math. 
+(data from www.kaggle.com/datasets/matt40/ordinal-likert-survey-on-hs-math)
+
 # Data Wrangling
 
-Read the data in and do any changes you deem necessary.
-
 ```{r}
-
 # ENTER YOUR DATA WRANGLING CODE HERE
 
+df <- read.csv("data/6460_final_data.csv")
+
+df_tidy <- df %>%
+  select(`grade_level`:`study_difficulty`,
+         `est_current_gpa`)
+
+anxiety_df <- df_tidy %>%
+  select(`grade_level`, `exam_anxiety`, `est_current_gpa`)
+
+pivot_df <- df_tidy %>%
+  select(`math_conf`:`study_difficulty`) %>%
+  pivot_longer(cols = c("math_conf":"study_difficulty"),
+               names_to = "factor",
+               values_to = "likert rating")
+
+count_df <- pivot_df %>%
+  count(`factor`, `likert rating`)
+
+#count_df %>%
+  #head()
+
+count_df <- count_df %>%
+  mutate(likert_factor = factor(`likert rating`))
+
+count_df <- count_df %>%
+  mutate(n = ifelse(`likert rating` < 3,
+                    -n, n))
 ```
 
 # Data Visualization
@@ -29,23 +58,68 @@ Read the data in and do any changes you deem necessary.
 
 #PLOT 1
 
+anxiety_df %>%
+  ggplot(aes(x=est_current_gpa, y=exam_anxiety, fill=grade_level)) +
+  geom_col() +
+  labs(y="Anxiety Level", x="Estimated GPA", fill="Grade",
+       title="Student Anxiety to GPA Bar Plot",
+       caption = "data from www.kaggle.com/datasets/matt40/ordinal-likert-survey-on-hs-math")
+
 ```
 
-PLOT EXPLANATION HERE
+This plot shows which students are showing the most anxiety. The colors represent the different high school grade levels and each bar represents a GPA score. You can see that the higher the GPA a student has actually somewhat leads to more anxiety, according to this plot. 
 
 ```{r}
 
 #PLOT 2
 
+count_df %>%
+  ggplot(aes(x = n,
+             y = reorder(`factor`, n),
+             fill = `likert_factor`)) +
+  geom_col(data = count_df %>% filter(n > 0),
+           position = position_stack(reverse = TRUE)) +
+  geom_col(data = count_df %>% filter(n < 1),
+           position = position_stack(reverse = FALSE)) +
+scale_fill_manual(values = brewer.pal(6,"BrBG")) +
+  theme_linedraw() +
+labs(y = "",
+       fill = "Rating",
+       title = "Student Performance Likert Survey: Visual Factor Bar Plot",
+       subtitle = "Students’ satisfaction ratings (1-5) for different 
+factors of school access, performance, and emotional ratings",
+       caption = "data from www.kaggle.com/datasets/matt40/ordinal-likert-survey-on-hs-math")
 ```
 
-PLOT EXPLANATION HERE
+In this plot above, I created a visual representation of different likert ratings from students and how they scored different aspects of the high school, when it comes to math. Using this likert scale and a color theme for the bars, it is easy to see which factors/aspects need improvement and how students are feeling in general when it comes to high school math.
 
 ```{r}
 
 #PLOT 3
 
+mean_df <- pivot_df %>%
+  group_by(`factor`) %>%
+  summarize(avg_rating = mean(`likert rating`, na.rm = TRUE)) %>%
+  ungroup()
+
+#mean_df%>%
+  #head()
+
+mean_df %>%
+  ggplot(aes(x = avg_rating,
+             y = `factor`,
+             group = 1)) +
+  geom_point() +
+  geom_line() +
+  labs(y = "",
+       x = "Average Likert Rating",
+       title = "Student Performance Likert Survey: Mean Ratings Line Plot",
+       subtitle = "Average likert ratings from students",
+       caption = "data from www.kaggle.com/datasets/matt40/ordinal-likert-survey-on-hs-math")
 ```
 
-PLOT EXPLANATION HERE
-CONCLUSION TO PROJECT
+In this plot above, I created a line plot showing the average student likert ratings for each service provided by the high school. The line helps show the difference in each average as well as which factors/aspects need the most improvement.
+
+
+
+
