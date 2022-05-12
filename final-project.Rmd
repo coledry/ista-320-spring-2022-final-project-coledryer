@@ -1,0 +1,51 @@
+---
+title: "ISTA 320 Final Project"
+author: "Cole Dryer"
+date: "Spring 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# remember to add any other libraries you need here:
+library(knitr)
+library(tidyverse)
+library(RColorBrewer)
+library(ggthemes)
+opts_chunk$set(echo = TRUE)
+```
+# Data Wrangling
+
+Read the data in and do any changes you deem necessary.
+
+```{r}
+
+# ENTER YOUR DATA WRANGLING CODE HERE
+
+```
+
+# Data Visualization
+
+```{r}
+
+#PLOT 1
+
+```
+
+PLOT EXPLANATION HERE
+
+```{r}
+
+#PLOT 2
+
+```
+
+PLOT EXPLANATION HERE
+
+```{r}
+
+#PLOT 3
+
+```
+
+PLOT EXPLANATION HERE
+CONCLUSION TO PROJECT
